@@ -1,3 +1,5 @@
+#include <math.h>
+
 // The points live in [0,DOMAIN]x[0,DOMAIN].
 #define DOMAIN 1
 
@@ -90,6 +92,29 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
 // Receives the hash table (and its size) where the pointers will be stored.
 void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node* hashTable, int tableSize) {
 
+    for(int i = 0; i<tableSize; i++) {
+        hashTable[i] = NULL;
+    }
+
+    int gridDim = ceil(DOMAIN/d); // grid is of size gridDimxgridDim
+
+    for(int i = 0; i<numPoints; i++) {
+        Points point = points[i];
+        int col = floor(point.x/d); // floor because indexing starts at 0
+        int row = (gridDim-1) - floor(point.y/d); // indexing is top to bottom
+        int key = col + gridDim*row; // quadrant index
+        insert(hashTable, key, hashingFun, point);
+    }
+}
+
+void insert(Node* hashTable, int key, IntFunction hashingFun, Point point) {
+    int index = hashingFun(key);
+
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->point = point;
+
+    newNode->next = hashTable[index]; // Insert at beginning of linked list.
+    hashTable[index] = newNode; // Update hash table pointer.
 }
 
 // Iterates over the array of points, finds their quadrant and its neighbors, 
