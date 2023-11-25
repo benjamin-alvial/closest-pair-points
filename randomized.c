@@ -1,5 +1,8 @@
 #include <math.h>
 
+// The sizes of the hashing tables.
+#define TABLE_SIZE 1000
+
 // The points live in [0,DOMAIN]x[0,DOMAIN].
 #define DOMAIN 1
 
@@ -18,34 +21,25 @@ typedef struct Node {
 // For defining hash functions int->int.
 typedef int (*IntFunction)(int);
 
-// Calculated the Euclidean distance between two points in R2.
-double calculateDistance(Point p1, Point p2) {
-    double dx = p1.x - p2.x, dy = p1.y - p2.y;
-    return sqrt(dx * dx + dy * dy);
-}
+// General algorithm
+void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *closestPair);
 
-// Calculates de d parameter used in the first part of the randomized algorithm.
-// This d will be used for grid dxd cells.
-// It is calculated by picking n times pairs of points and returning the minimum distance.
-float calculateParameterD(Point *points, int n) {
+// Calculate the d parameter used in the randomized algorithm
+float calculateParameterD(Point *points, int n);
+double calculateDistance(Point p1, Point p2);
 
-    float current_min_d = DOMAIN + 1; // greater than domain
-    for(int i = 0; i<n; i++) {
+// Create hash table from points
+void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, int tableSize);
+int getQuadrantKeyFromPoint(Point point, float d);
+void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
-        int index1 = rand(0,n);
-        int index2 = rand(0,n);
-        Point p1 = points[index1];
-        Point p2 = points[index2];
-        float d = calculateDistance(p1,p2);
+// Compare points in table
+//void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
 
-        if(d<current_min_d) {
-            current_min_d = d;    
-        }
-
-    }
-
-    return current_min_d;
-}
+// Three hashing functions are used
+int universalHashFun(int key);
+int fastestHashFun(int key);
+int mersenneHashFun(int key);
 
 // The algorithm finds the closest pair of points and saves them in the array of size 2 closestPair.
 // It works by dividing the space in a grid of dxd quadrants,
@@ -65,15 +59,47 @@ float calculateParameterD(Point *points, int n) {
 void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *closestPair) {
 
     // Calculate the parameter for the size of the quadrants.
-    float d = calculateParameterD(points);
+    float d = calculateParameterD(points, numPoints);
 
     // Create the hash table with the points, indexed by the hash of the index of the quadrant they belong to.
-    Node* hashTable[tableSize];
+    int tableSize = TABLE_SIZE;
+    struct Node** hashTable = (struct Node**)malloc(tableSize * sizeof(struct Node*));
     createHashTable(points, numPoints, hashingFun, d, hashTable, tableSize);
 
     // Compare each point with surrounding quadrants’ points, searching for minimum.
-    comparePoints( points, numPoints, d, hashTable, closestPair);
+    //comparePoints(points, numPoints, d, hashTable, closestPair);
 
+    free(hashTable);
+
+}
+
+// Calculates de d parameter used in the first part of the randomized algorithm.
+// This d will be used for grid dxd cells.
+// It is calculated by picking n times pairs of points and returning the minimum distance.
+float calculateParameterD(Point *points, int n) {
+
+    float current_min_d = DOMAIN + 1; // greater than domain
+    for(int i = 0; i<n; i++) {
+
+        int index1 = rand() % n;
+        int index2 = rand() % n;
+        Point p1 = points[index1];
+        Point p2 = points[index2];
+        float d = calculateDistance(p1,p2);
+
+        if(d<current_min_d) {
+            current_min_d = d;    
+        }
+
+    }
+
+    return current_min_d;
+}
+
+// Calculated the Euclidean distance between two points in R2.
+double calculateDistance(Point p1, Point p2) {
+    double dx = p1.x - p2.x, dy = p1.y - p2.y;
+    return sqrt(dx * dx + dy * dy);
 }
 
 // Creates a hash table with linked lists of points.
@@ -89,24 +115,32 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
 // Receives the hash function used to find where to store a point.
 // Receives the parameter d to find the quadrant a point belongs to.
 // Receives the hash table (and its size) where the pointers will be stored.
-void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node* hashTable, int tableSize) {
+void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, int tableSize) {
 
     for(int i = 0; i<tableSize; i++) {
         hashTable[i] = NULL;
     }
 
-    int gridDim = ceil(DOMAIN/d); // grid is of size gridDimxgridDim
-
     for(int i = 0; i<numPoints; i++) {
         Point point = points[i];
-        int col = floor(point.x/d); // floor because indexing starts at 0
-        int row = (gridDim-1) - floor(point.y/d); // indexing is top to bottom
-        int key = col + gridDim*row; // quadrant index
+        int key = getQuadrantKeyFromPoint(point, d);
         insert(hashTable, key, hashingFun, point);
     }
+
 }
 
-void insert(Node* hashTable, int key, IntFunction hashingFun, Point point) {
+// Calculates the index of the quadrant a given point belongs to.
+int getQuadrantKeyFromPoint(Point point, float d) {
+    int gridDim = ceil(DOMAIN/d); // grid is of size gridDimxgridDim
+    int col = floor(point.x/d); // floor because indexing starts at 0
+    int row = (gridDim-1) - floor(point.y/d); // indexing is top to bottom
+    int key = col + gridDim*row; // quadrant index
+    return key;
+}
+
+// Inserts the given point in the given hashTable at the index calculated
+// using the given key and hashingFun.
+void insert(Node** hashTable, int key, IntFunction hashingFun, Point point) {
     int index = hashingFun(key);
 
     Node* newNode = (Node*)malloc(sizeof(Node));
@@ -116,9 +150,10 @@ void insert(Node* hashTable, int key, IntFunction hashingFun, Point point) {
     hashTable[index] = newNode; // Update hash table pointer.
 }
 
+/*
 // Iterates over the array of points, finds their quadrant and its neighbors, 
 // compares the current point to all others in these quadrants, updating minimum.
-void comparePoints(Point* points, int numPoints, float d, Node* hashTable, Point *closestPair) {
+void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
     int gridDim = ceil(DOMAIN/d);
     float MinD = 0;
     int MaxCell = gridDim -1;
@@ -228,7 +263,7 @@ float newMinD(float MinD, Point point,int col,int row, Node* hashTable,int gridD
 // 8  9  10 11
 // 12 13 14 15
 // A key is a quadrant index, for example, key=13.
-// Doing idx=hash(15) will return where in the hash table this quadrant is stored.
+// Doing idx=hash(13) will return where in the hash table this quadrant is stored.
 int universalHashFun(int key) {
 
 }
@@ -240,3 +275,4 @@ int fastestHashFun(int key) {
 int mersenneHashFun(int key) {
 
 }
+*/
