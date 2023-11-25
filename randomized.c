@@ -34,7 +34,8 @@ int getQuadrantKeyFromPoint(Point point, float d);
 void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
 // Compare points in table
-//void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
+float comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
+float newMinD(float MinD, Point point,int col,int row, Node** hashTable,int gridDim);
 
 // Three hashing functions are used
 int universalHashFun(int key);
@@ -150,10 +151,10 @@ void insert(Node** hashTable, int key, IntFunction hashingFun, Point point) {
     hashTable[index] = newNode; // Update hash table pointer.
 }
 
-/*
+
 // Iterates over the array of points, finds their quadrant and its neighbors, 
 // compares the current point to all others in these quadrants, updating minimum.
-void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
+float comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
     int gridDim = ceil(DOMAIN/d);
     float MinD = 0;
     int MaxCell = gridDim -1;
@@ -164,13 +165,13 @@ void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Poin
         int row = (gridDim-1) - floor(point.y/d); 
         int key = col + gridDim*row;
         //Starting Value
-        Node ActualNode = hashTable[key];
-        MinD = calculateDistance(point,ActualNode.point);
+        Node *ActualNode = hashTable[key];
+        MinD = calculateDistance(point,ActualNode->point);
         // Calculate de MinD between the same quadrant
-        while(hashTable[key].next !=NULL){
-            ActualNode = *ActualNode.next;
-            if(calculateDistance(point,ActualNode.point)< MinD){
-                MinD = calculateDistance(point,ActualNode.point);
+        while(hashTable[key]->next !=NULL){
+            ActualNode = ActualNode->next;
+            if(calculateDistance(point,ActualNode->point)< MinD){
+                MinD = calculateDistance(point,ActualNode->point);
             }
         }
         if(col == 0){
@@ -240,16 +241,17 @@ void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Poin
     }
     return MinD;
 }
-float newMinD(float MinD, Point point,int col,int row, Node* hashTable,int gridDim){
+
+float newMinD(float MinD, Point point,int col,int row, Node** hashTable,int gridDim) {
     int key = col + gridDim*row;
-    Node ActualNode = hashTable[key];
-    if(calculateDistance(point,ActualNode.point)< MinD){
-        MinD = calculateDistance(point,ActualNode.point);
+    Node *ActualNode = hashTable[key];
+    if(calculateDistance(point,ActualNode->point)< MinD){
+        MinD = calculateDistance(point,ActualNode->point);
     }
-    while(hashTable[key].next !=NULL){
-        ActualNode = *ActualNode.next;
-        if(calculateDistance(point,ActualNode.point)< MinD){
-            MinD = calculateDistance(point,ActualNode.point);
+    while(hashTable[key]->next !=NULL){
+        ActualNode = ActualNode->next;
+        if(calculateDistance(point,ActualNode->point)< MinD){
+            MinD = calculateDistance(point,ActualNode->point);
         }
     }
     return MinD;
@@ -265,14 +267,13 @@ float newMinD(float MinD, Point point,int col,int row, Node* hashTable,int gridD
 // A key is a quadrant index, for example, key=13.
 // Doing idx=hash(13) will return where in the hash table this quadrant is stored.
 int universalHashFun(int key) {
-
+    return key;
 }
 
 int fastestHashFun(int key) {
-
+    return key;
 }
 
 int mersenneHashFun(int key) {
-
+    return key;
 }
-*/
