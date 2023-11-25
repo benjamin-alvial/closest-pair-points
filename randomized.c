@@ -250,8 +250,9 @@ float newMinD(float MinD, Point point,int col,int row, Node** hashTable,int grid
     }
     while(hashTable[key]->next !=NULL){
         ActualNode = ActualNode->next;
-        if(calculateDistance(point,ActualNode->point)< MinD){
-            MinD = calculateDistance(point,ActualNode->point);
+        int ActualD = calculateDistance(point,ActualNode->point);
+        if(ActualD< MinD && ActualD> 0,0000001){
+            MinD = ActualD;
         }
     }
     return MinD;
