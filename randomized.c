@@ -34,8 +34,8 @@ int getQuadrantKeyFromPoint(Point point, float d);
 void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
 // Compare points in table
-float comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
-float newMinD(float MinD, Point point,int col,int row, Node** hashTable,int gridDim);
+float* comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
+void newMinD(float* MinD, Point point,int col,int row, Node** hashTable,int gridDim);
 
 // Three hashing functions are used
 int universalHashFun(int key);
@@ -68,7 +68,16 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
     createHashTable(points, numPoints, hashingFun, d, hashTable, tableSize);
 
     // Compare each point with surrounding quadrants’ points, searching for minimum.
-    //comparePoints(points, numPoints, d, hashTable, closestPair);
+    //float* MinD&Points = comparePoints(points, numPoints, d, hashTable, closestPair);
+    //Point punto1;
+    //punto1.x = MinD&Points[0];
+    //punto1.y = MinD&Points[1];
+    //Point punto2;
+    //punto2.x = MinD&Points[2];
+    //punto2.y = MinD&Points[3];
+    //closestPair[0] = punto1;
+    //closestPair[1] = punto2;
+    //float MinD = MinD&Points[4];
 
     free(hashTable);
 
@@ -154,9 +163,11 @@ void insert(Node** hashTable, int key, IntFunction hashingFun, Point point) {
 
 // Iterates over the array of points, finds their quadrant and its neighbors, 
 // compares the current point to all others in these quadrants, updating minimum.
-float comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
+// Returns an array with 5 values 0,1 -> point 1 , 2,3 -> point 2 , 4 -> Minimum distance saved
+float* comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
     int gridDim = ceil(DOMAIN/d);
     float MinD = 0;
+    float MinPar[5] = {0,0,0,0,0};
     int MaxCell = gridDim -1;
     for(int i = 0; i < numPoints; i++){ // for all number
         // we got the Key of the point
@@ -166,96 +177,115 @@ float comparePoints(Point* points, int numPoints, float d, Node** hashTable, Poi
         int key = col + gridDim*row;
         //Starting Value
         Node *ActualNode = hashTable[key];
-        MinD = calculateDistance(point,ActualNode->point);
+        //MinD = calculateDistance(point,ActualNode->point);
+        MinPar[4] = calculateDistance(point,ActualNode->point);
+        MinPar[0] = point.x;
+        MinPar[1] = point.y;
+        MinPar[2] = ActualNode->point.x;
+        MinPar[3] = ActualNode->point.y;
         // Calculate de MinD between the same quadrant
         while(hashTable[key]->next !=NULL){
             ActualNode = ActualNode->next;
             if(calculateDistance(point,ActualNode->point)< MinD){
-                MinD = calculateDistance(point,ActualNode->point);
+                //MinD = calculateDistance(point,ActualNode->point);
+                MinPar[4] = calculateDistance(point,ActualNode->point);
+                MinPar[0] = point.x;
+                MinPar[1] = point.y;
+                MinPar[2] = ActualNode->point.x;
+                MinPar[3] = ActualNode->point.y;
             }
         }
         if(col == 0){
             if(row == 0){
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
             }
             if(row == MaxCell){
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
             }
             else{
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
             }
         }
         if(col == MaxCell){
             if(row == 0){
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
             }
             if(row == MaxCell){
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
             }
             else{
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
             }
         }
         else{
             if(row == 0){
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
             }
             if(row == MaxCell){
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
             }
             else{
-                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
-                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinPar,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinPar,point,col-1,row,hashTable,gridDim);
             }
         }
     }
-    return MinD;
+    return MinPar;
 }
 
-float newMinD(float MinD, Point point,int col,int row, Node** hashTable,int gridDim) {
+void newMinD(float* MinPar, Point point,int col,int row, Node** hashTable,int gridDim) {
     int key = col + gridDim*row;
     Node *ActualNode = hashTable[key];
-    if(calculateDistance(point,ActualNode->point)< MinD){
-        MinD = calculateDistance(point,ActualNode->point);
+    if(calculateDistance(point,ActualNode->point)< MinPar[4]){
+        //MinD = calculateDistance(point,ActualNode->point);
+        MinPar[4] = calculateDistance(point,ActualNode->point);
+        MinPar[0] = point.x;
+        MinPar[1] = point.y;
+        MinPar[2] = ActualNode->point.x;
+        MinPar[3] = ActualNode->point.y;
     }
     while(hashTable[key]->next !=NULL){
         ActualNode = ActualNode->next;
         int ActualD = calculateDistance(point,ActualNode->point);
-        if(ActualD< MinD && ActualD> 0,0000001){
-            MinD = ActualD;
+        if(ActualD< MinPar[4] && ActualD> 0,0000001){
+            //MinD = ActualD;
+            MinPar[4] = calculateDistance(point,ActualNode->point);
+            MinPar[0] = point.x;
+            MinPar[1] = point.y;
+            MinPar[2] = ActualNode->point.x;
+            MinPar[3] = ActualNode->point.y;
         }
     }
-    return MinD;
 }
 
 
