@@ -30,13 +30,12 @@ double calculateDistance(Point p1, Point p2) {
 float calculateParameterD(Point *points, int n) {
 
     float current_min_d = DOMAIN + 1; // greater than domain
-
     for(int i = 0; i<n; i++) {
 
         int index1 = rand(0,n);
         int index2 = rand(0,n);
-        float p1 = points[index1];
-        float p2 = points[index2];
+        Point p1 = points[index1];
+        Point p2 = points[index2];
         float d = calculateDistance(p1,p2);
 
         if(d<current_min_d) {
@@ -45,7 +44,7 @@ float calculateParameterD(Point *points, int n) {
 
     }
 
-    return d;
+    return current_min_d;
 }
 
 // The algorithm finds the closest pair of points and saves them in the array of size 2 closestPair.
@@ -73,7 +72,7 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
     createHashTable(points, numPoints, hashingFun, d, hashTable, tableSize);
 
     // Compare each point with surrounding quadrants’ points, searching for minimum.
-    comparePoints(points, hashTable, closestPair);
+    comparePoints( points, numPoints, d, hashTable, closestPair);
 
 }
 
@@ -99,7 +98,7 @@ void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float
     int gridDim = ceil(DOMAIN/d); // grid is of size gridDimxgridDim
 
     for(int i = 0; i<numPoints; i++) {
-        Points point = points[i];
+        Point point = points[i];
         int col = floor(point.x/d); // floor because indexing starts at 0
         int row = (gridDim-1) - floor(point.y/d); // indexing is top to bottom
         int key = col + gridDim*row; // quadrant index
@@ -119,9 +118,108 @@ void insert(Node* hashTable, int key, IntFunction hashingFun, Point point) {
 
 // Iterates over the array of points, finds their quadrant and its neighbors, 
 // compares the current point to all others in these quadrants, updating minimum.
-void comparePoints(Point* points, array* hashTable, Point *closestPair) {
-
+void comparePoints(Point* points, int numPoints, float d, Node* hashTable, Point *closestPair) {
+    int gridDim = ceil(DOMAIN/d);
+    float MinD = 0;
+    int MaxCell = gridDim -1;
+    for(int i = 0; i < numPoints; i++){ // for all number
+        // we got the Key of the point
+        Point point = points[i];
+        int col = floor(point.x/d); 
+        int row = (gridDim-1) - floor(point.y/d); 
+        int key = col + gridDim*row;
+        //Starting Value
+        Node ActualNode = hashTable[key];
+        MinD = calculateDistance(point,ActualNode.point);
+        // Calculate de MinD between the same quadrant
+        while(hashTable[key].next !=NULL){
+            ActualNode = *ActualNode.next;
+            if(calculateDistance(point,ActualNode.point)< MinD){
+                MinD = calculateDistance(point,ActualNode.point);
+            }
+        }
+        if(col == 0){
+            if(row == 0){
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+            }
+            if(row == MaxCell){
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+            }
+            else{
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+            }
+        }
+        if(col == MaxCell){
+            if(row == 0){
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+            }
+            if(row == MaxCell){
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+            }
+            else{
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+            }
+        }
+        else{
+            if(row == 0){
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+            }
+            if(row == MaxCell){
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+            }
+            else{
+                MinD = newMinD(MinD,point,col-1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row-1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col+1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row+1,hashTable,gridDim);
+                MinD = newMinD(MinD,point,col-1,row,hashTable,gridDim);
+            }
+        }
+    }
+    return MinD;
 }
+float newMinD(float MinD, Point point,int col,int row, Node* hashTable,int gridDim){
+    int key = col + gridDim*row;
+    Node ActualNode = hashTable[key];
+    if(calculateDistance(point,ActualNode.point)< MinD){
+        MinD = calculateDistance(point,ActualNode.point);
+    }
+    while(hashTable[key].next !=NULL){
+        ActualNode = *ActualNode.next;
+        if(calculateDistance(point,ActualNode.point)< MinD){
+            MinD = calculateDistance(point,ActualNode.point);
+        }
+    }
+    return MinD;
+}
+
 
 // Three hashing functions are used. The keys are the indices of the quadrants.
 // For example, the space is divided as:
