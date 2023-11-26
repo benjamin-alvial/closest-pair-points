@@ -1,15 +1,12 @@
 #include <math.h>
 
+#include "both.h"
+
 // The sizes of the hashing tables.
 #define TABLE_SIZE 1000
 
 // The points live in [0,DOMAIN]x[0,DOMAIN].
 #define DOMAIN 1
-
-// Struct to represent a point in [0,DOMAIN]x[0,DOMAIN].
-typedef struct {
-    double x, y;
-} Point;
 
 // Struct to represent a node in a linked list where
 // points will be stored in the hash table.
@@ -26,7 +23,6 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
 
 // Calculate the d parameter used in the randomized algorithm
 float calculateParameterD(Point *points, int n);
-double calculateDistance(Point p1, Point p2);
 
 // Create hash table from points
 void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, int tableSize);
@@ -34,8 +30,8 @@ int getQuadrantKeyFromPoint(Point point, float d);
 void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
 // Compare points in table
-void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
-void newMinD(float MinD, Point* closestPair, Point point,int col,int row, Node** hashTable,int gridDim);
+void compareEachWithNeighbors(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair);
+void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node** hashTable,int gridDim);
 
 // Three hashing functions are used
 int universalHashFun(int key);
@@ -66,9 +62,9 @@ void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *clo
     int tableSize = TABLE_SIZE;
     struct Node** hashTable = (struct Node**)malloc(tableSize * sizeof(struct Node*));
     createHashTable(points, numPoints, hashingFun, d, hashTable, tableSize);
-    printf("hash table created\n");
+    
     // Compare each point with surrounding quadrants’ points, searching for minimum.
-    comparePoints(points, numPoints, d, hashTable, closestPair);
+    compareEachWithNeighbors(points, numPoints, d, hashTable, closestPair);
     free(hashTable);
 
 }
@@ -94,12 +90,6 @@ float calculateParameterD(Point *points, int n) {
     }
 
     return current_min_d;
-}
-
-// Calculated the Euclidean distance between two points in R2.
-double calculateDistance(Point p1, Point p2) {
-    double dx = p1.x - p2.x, dy = p1.y - p2.y;
-    return sqrt(dx * dx + dy * dy);
 }
 
 // Creates a hash table with linked lists of points.
@@ -153,7 +143,7 @@ void insert(Node** hashTable, int key, IntFunction hashingFun, Point point) {
 /// Iterates over the array of points, finds their quadrant and its neighbors, 
 // compares the current point to all others in these quadrants, updating minimum.
 // Returns an array with 5 values 0,1 -> point 1 , 2,3 -> point 2 , 4 -> Minimum distance saved
-void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
+void compareEachWithNeighbors(Point* points, int numPoints, float d, Node** hashTable, Point *closestPair) {
     int gridDim = ceil(DOMAIN/d);
     float MinD = DOMAIN+1;
     //float MinPar[5] = {0,0,0,0,0};
@@ -189,76 +179,76 @@ void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Poin
         if(col == 0){
             if(row == 0){
                 // Upper-left quadrant
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
             }
             else if(row == MaxCell){
                 // Lower-left quadrant
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
             }
             else{
                 // Left-side inner quadrants
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
             }
         }
 
         else if(col == MaxCell){
             if(row == 0){
                 // Upper-right quadrant
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
             }
             else if(row == MaxCell){
                 // Lower-right quadrant
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
             }
             else{
                 // Right-side inner quadrants
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
             }
         }
 
         else {
             if(row == 0){
                 // Upper-side inner quadrants
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
             }
             else if(row == MaxCell){
                 // Lower-side inner quadrants
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
             }
             else{
                 // Inner quadrants with 8 neighbors
-                newMinD(MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
-                newMinD(MinD,closestPair,point,col-1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row-1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col+1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row+1,hashTable,gridDim);
+                newMinD(&MinD,closestPair,point,col-1,row,hashTable,gridDim);
             }
         }
     }
@@ -266,7 +256,7 @@ void comparePoints(Point* points, int numPoints, float d, Node** hashTable, Poin
     return;
 }
 
-void newMinD(float MinD, Point* closestPair, Point point,int col,int row, Node** hashTable,int gridDim) {
+void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node** hashTable,int gridDim) {
     int key = col + gridDim*row;
     Node *ActualNode = hashTable[key%1000];
     //if(calculateDistance(point,ActualNode->point)< MinD){
@@ -279,8 +269,8 @@ void newMinD(float MinD, Point* closestPair, Point point,int col,int row, Node**
             //ActualNode = ActualNode->next;
             float candidateDistance = calculateDistance(point,ActualNode->point);
             //int ActualD = calculateDistance(point,ActualNode->point);
-            if(candidateDistance< MinD && candidateDistance> 0.0000001){
-                MinD = candidateDistance;
+            if(candidateDistance< *MinD && candidateDistance> 0.0000001){
+                *MinD = candidateDistance;
                 closestPair[0] = point;
                 closestPair[1] = ActualNode->point;
             }

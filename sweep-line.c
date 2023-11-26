@@ -3,16 +3,7 @@
 #include <math.h>
 #include <float.h>
 
-typedef struct
-{
-    double x, y;
-} Point;
-
-double calculateDistance(Point p1, Point p2)
-{
-    double dx = p1.x - p2.x, dy = p1.y - p2.y;
-    return sqrt(dx * dx + dy * dy);
-}
+#include "both.h"
 
 int comparePoints(const void *a, const void *b)
 {
