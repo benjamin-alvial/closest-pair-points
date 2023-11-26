@@ -5,26 +5,28 @@
 #include <float.h>
 
 #include "sweep-line.c"
-//#include "randomized.c"
+#include "randomized.c"
 
 // Values for amount of points.
 // go from N_INITIAL to N_FINAL with steps of N_STEP
 // #define N_INITIAL 5000000
 // #define N_FINAL 50000000
 // #define N_STEP 5000000
-#define N_INITIAL 5000000
-#define N_FINAL 50000000
-#define N_STEP 5000000
+#define N_INITIAL 100000
+#define N_FINAL 100000
+#define N_STEP 1000
 
 // Amount of times the algorithm will be executed to calculate
 // the average performance
 // #define NUMBER_REPS 101
-#define NUMBER_REPS 101
+#define NUMBER_REPS 10
 
 // Amount of different fixed-sized inputs to analyze dependence on
 // input distribution
-#define FIXED_INPUT_SIZE 50000000
-#define FIXED_INPUT_REPS 100
+//#define FIXED_INPUT_SIZE 50000000
+//#define FIXED_INPUT_REPS 100
+#define FIXED_INPUT_SIZE 10000
+#define FIXED_INPUT_REPS 10
 
 double randomZeroToOne() {
     return (double)rand() / (RAND_MAX + 1.0);
@@ -37,9 +39,18 @@ Point generateRandomPoint() {
     return randomPoint;
 }
 
+int trivialHashFun(int key) {
+    return key%1000;
+}
+
 int main() {
     // Set the seed for testing and evaluation purposes.
     srand(123);
+
+
+    printf("============================================\n");
+    printf("EXPERIMENT 1: ARRAYS OF DIFFERENT SIZES...\n");
+    printf("============================================\n");
 
     // This file will be used to plot the performance data.
     FILE *results_file_1 = fopen("performance_results_1.txt", "w");
@@ -62,7 +73,7 @@ int main() {
         // Fill the array with random points in the domain [0,1)x[0,1).
         for (int i = 0; i < n; i++) {
             points[i] = generateRandomPoint();
-            // printf("Point: (%f, %f)\n", points[i].x, points[i].y);
+            //printf("Point: (%f, %f)\n", points[i].x, points[i].y);
         }
 
         // Execute both algorithms with same array NUMBER_REPS times.
@@ -71,28 +82,34 @@ int main() {
             printf("Repetition number %d...\n", rep);
             double cpu_time_used_sl, cpu_time_used_rd;
 
-            printf("- Finding closest pair with sweep-line...\n");
+            //printf("- Finding closest pair with sweep-line...\n");
             clock_t start_time_sl, end_time_sl;
             start_time_sl = clock();
             Point *closestPair_sl = (Point *)malloc(2 * sizeof(Point));
             sweepline(points, n, closestPair_sl);
+            //randomized(points, n, trivialHashFun, closestPair_sl);
             end_time_sl = clock();
             cpu_time_used_sl = ((double)(end_time_sl - start_time_sl)) / CLOCKS_PER_SEC;
-            printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
+            double closestDistance_sl =  calculateDistance(closestPair_sl[0],closestPair_sl[1]);
+            printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
                    DBL_DIG, closestPair_sl[0].x, DBL_DIG, closestPair_sl[0].y,
-                   DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y);
+                   DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y,
+                   DBL_DIG, closestDistance_sl);
             free(closestPair_sl);
 
-            printf("- Finding closest pair with randomized...\n");
+            //printf("- Finding closest pair with randomized...\n");
             clock_t start_time_rd, end_time_rd;
             start_time_rd = clock();
             Point *closestPair_rd = (Point *)malloc(2 * sizeof(Point));
-            sweepline(points, n, closestPair_rd);
+            //sweepline(points, n, closestPair_rd);
+            randomized(points, n, trivialHashFun, closestPair_rd);
             end_time_rd = clock();
             cpu_time_used_rd = ((double)(end_time_rd - start_time_rd)) / CLOCKS_PER_SEC;
-            printf("- Closest pair with randomized: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
+            double closestDistance_rd =  calculateDistance(closestPair_rd[0],closestPair_rd[1]);
+            printf("- Closest pair with randomized: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
                    DBL_DIG, closestPair_rd[0].x, DBL_DIG, closestPair_rd[0].y,
-                   DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y);
+                   DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y,
+                   DBL_DIG, closestDistance_rd);
             free(closestPair_rd);
 
             fprintf(results_file_1, "%d, %d, %lf, %lf\n", n, rep, cpu_time_used_sl, cpu_time_used_rd);
@@ -102,6 +119,11 @@ int main() {
         free(points);
 
     }
+    
+
+    printf("============================================\n");
+    printf("EXPERIMENT 2: DIFFERENT ARRAYS OF FIXED SIZE...\n");
+    printf("============================================\n");
 
     // This file will be used to plot the performance data.
     FILE *results_file_2 = fopen("performance_results_2.txt", "w");
@@ -128,28 +150,34 @@ int main() {
 
         double cpu_time_used_sl, cpu_time_used_rd;
 
-        printf("- Finding closest pair with sweep-line...\n");
+        //printf("- Finding closest pair with sweep-line...\n");
         clock_t start_time_sl, end_time_sl;
         start_time_sl = clock();
         Point *closestPair_sl = (Point *)malloc(2 * sizeof(Point));
         sweepline(points, FIXED_INPUT_SIZE, closestPair_sl);
+        //randomized(points, FIXED_INPUT_SIZE, trivialHashFun, closestPair_sl);
         end_time_sl = clock();
         cpu_time_used_sl = ((double)(end_time_sl - start_time_sl)) / CLOCKS_PER_SEC;
-        printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
-                DBL_DIG, closestPair_sl[0].x, DBL_DIG, closestPair_sl[0].y,
-                DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y);
+        double closestDistance_sl = calculateDistance(closestPair_sl[0],closestPair_sl[1]);
+        printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
+                   DBL_DIG, closestPair_sl[0].x, DBL_DIG, closestPair_sl[0].y,
+                   DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y,
+                   DBL_DIG, closestDistance_sl);
         free(closestPair_sl);
 
-        printf("- Finding closest pair with randomized...\n");
+        //printf("- Finding closest pair with randomized...\n");
         clock_t start_time_rd, end_time_rd;
         start_time_rd = clock();
         Point *closestPair_rd = (Point *)malloc(2 * sizeof(Point));
-        sweepline(points, FIXED_INPUT_SIZE, closestPair_rd);
+        //sweepline(points, FIXED_INPUT_SIZE, closestPair_rd);
+        randomized(points, FIXED_INPUT_SIZE, trivialHashFun, closestPair_rd);
         end_time_rd = clock();
         cpu_time_used_rd = ((double)(end_time_rd - start_time_rd)) / CLOCKS_PER_SEC;
-        printf("- Closest pair with randomized: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
-                DBL_DIG, closestPair_rd[0].x, DBL_DIG, closestPair_rd[0].y,
-                DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y);
+        double closestDistance_rd = calculateDistance(closestPair_rd[0],closestPair_rd[1]);
+        printf("- Closest pair with randomized: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
+                   DBL_DIG, closestPair_rd[0].x, DBL_DIG, closestPair_rd[0].y,
+                   DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y,
+                   DBL_DIG, closestDistance_rd);
         free(closestPair_rd);
 
         fprintf(results_file_2, "%d, %lf, %lf\n", rep, cpu_time_used_sl, cpu_time_used_rd);
