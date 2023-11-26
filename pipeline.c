@@ -19,7 +19,12 @@
 // Amount of times the algorithm will be executed to calculate
 // the average performance
 // #define NUMBER_REPS 101
-#define NUMBER_REPS 5
+#define NUMBER_REPS 101
+
+// Amount of different fixed-sized inputs to analyze dependence on
+// input distribution
+#define FIXED_INPUT_SIZE 50000000
+#define FIXED_INPUT_REPS 100
 
 double randomZeroToOne() {
     return (double)rand() / (RAND_MAX + 1.0);
@@ -37,7 +42,7 @@ int main() {
     srand(123);
 
     // This file will be used to plot the performance data.
-    FILE *results_file = fopen("performance_results.txt", "w");
+    FILE *results_file_1 = fopen("performance_results_1.txt", "w");
 
     for(int n=N_INITIAL; n<N_FINAL+1; n+=N_STEP) {
 
@@ -90,7 +95,7 @@ int main() {
                    DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y);
             free(closestPair_rd);
 
-            fprintf(results_file, "%d, %d, %lf, %lf\n", n, rep, cpu_time_used_sl, cpu_time_used_rd);
+            fprintf(results_file_1, "%d, %d, %lf, %lf\n", n, rep, cpu_time_used_sl, cpu_time_used_rd);
                 
         }
 
@@ -98,6 +103,62 @@ int main() {
 
     }
 
-    fclose(results_file);
+    // This file will be used to plot the performance data.
+    FILE *results_file_2 = fopen("performance_results_2.txt", "w");
+
+    printf("--------------------------------------------\n");
+    printf("Finding the closest pair from different %d points for %d repetitions...\n", FIXED_INPUT_SIZE, FIXED_INPUT_REPS);
+    printf("--------------------------------------------\n");
+
+    for (int rep = 1; rep < FIXED_INPUT_REPS + 1; rep++) {
+        printf("Repetition number %d...\n", rep);
+        printf("- Creating array...\n");
+
+        Point *points = (Point *)malloc(FIXED_INPUT_SIZE * sizeof(Point));
+        if (points == NULL) {
+            fprintf(stderr, "Memory allocation failed.\n");
+            return 1;
+        }
+
+        // Fill the array with random points in the domain [0,1)x[0,1).
+        for (int i = 0; i < FIXED_INPUT_SIZE; i++) {
+            points[i] = generateRandomPoint();
+            // printf("Point: (%f, %f)\n", points[i].x, points[i].y);
+        }
+
+        double cpu_time_used_sl, cpu_time_used_rd;
+
+        printf("- Finding closest pair with sweep-line...\n");
+        clock_t start_time_sl, end_time_sl;
+        start_time_sl = clock();
+        Point *closestPair_sl = (Point *)malloc(2 * sizeof(Point));
+        sweepline(points, FIXED_INPUT_SIZE, closestPair_sl);
+        end_time_sl = clock();
+        cpu_time_used_sl = ((double)(end_time_sl - start_time_sl)) / CLOCKS_PER_SEC;
+        printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
+                DBL_DIG, closestPair_sl[0].x, DBL_DIG, closestPair_sl[0].y,
+                DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y);
+        free(closestPair_sl);
+
+        printf("- Finding closest pair with randomized...\n");
+        clock_t start_time_rd, end_time_rd;
+        start_time_rd = clock();
+        Point *closestPair_rd = (Point *)malloc(2 * sizeof(Point));
+        sweepline(points, FIXED_INPUT_SIZE, closestPair_rd);
+        end_time_rd = clock();
+        cpu_time_used_rd = ((double)(end_time_rd - start_time_rd)) / CLOCKS_PER_SEC;
+        printf("- Closest pair with randomized: (%.*lf, %.*lf) and (%.*lf, %.*lf)\n",
+                DBL_DIG, closestPair_rd[0].x, DBL_DIG, closestPair_rd[0].y,
+                DBL_DIG, closestPair_rd[1].x, DBL_DIG, closestPair_rd[1].y);
+        free(closestPair_rd);
+
+        fprintf(results_file_2, "%d, %lf, %lf\n", rep, cpu_time_used_sl, cpu_time_used_rd);
+
+        free(points);
+
+    }
+
+    fclose(results_file_1);
+    fclose(results_file_2);
     return 0;
 }

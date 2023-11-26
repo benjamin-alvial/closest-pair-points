@@ -2,12 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 
-file_path = 'performance_results.txt'
+file_path = 'performance_results_1.txt'
 column_names = ['n', 'rep', 'cpu_sl', 'cpu_rd']
 raw_df = pd.read_csv(file_path, names=column_names, delimiter=',')
 
 # Specify the chunk size
-NUMBER_REPS = 5
+NUMBER_REPS = 101
 
 # Create an empty DataFrame to store the results
 result_df = pd.DataFrame(columns=['chunk', 'n', 'avg_cpu_sl', 'avg_cpu_rd'])
@@ -101,3 +101,21 @@ plt.show()
 # ============ Experiment 3 ============
 # Plots histogram of times taken by algorithms for 
 # different arrays of points of a fixed size.
+file_path = 'performance_results_2.txt'
+column_names = ['rep', 'cpu_sl', 'cpu_rd']
+df = pd.read_csv(file_path, names=column_names, delimiter=',')
+
+# Plot histogram with different colors for each column
+plt.hist([df['cpu_sl'], df['cpu_rd']], color=['blue', 'green'], alpha=0.7, label=['cpu_sl', 'cpu_rd'])
+
+# Add labels and title
+plt.xlabel('time (s)')
+plt.ylabel('frequency')
+plt.title('Histogram of cpu_sl and cpu_rd')
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.savefig('exp3.png')
+plt.show()
