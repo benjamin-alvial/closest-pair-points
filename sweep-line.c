@@ -114,6 +114,8 @@ void sweepline(Point *points, int numPoints, Point *closestPair)
     free(set->members);
     free(set);
 
+    /*
+
     bool foundFirst = false, foundSecond = false;
     for (int i = 0; i < numPoints; i++)
     {
@@ -135,4 +137,5 @@ void sweepline(Point *points, int numPoints, Point *closestPair)
     {
         printf("Ambos puntos del par mas cercano se encontraron en el arreglo original.\n");
     }
+    */
 }
