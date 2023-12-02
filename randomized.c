@@ -2,11 +2,28 @@
 
 #include "both.h"
 
-// The sizes of the hashing tables.
-#define TABLE_SIZE 1000
-
 // The points live in [0,DOMAIN]x[0,DOMAIN].
 #define DOMAIN 1
+
+#define EPSILON 0.000000000000001
+
+unsigned long long prime;
+int primeExp;
+unsigned long long a;
+unsigned long long b;
+int tableSize;
+int tableSizeExp;
+
+// https://stackoverflow.com/questions/28115724/getting-big-random-numbers-in-c-c
+unsigned long long llrand() {
+    unsigned long long r = 0;
+
+    for (int i = 0; i < 5; ++i) {
+        r = (r << 15) | (rand() & 0x7FFF);
+    }
+
+    return r & 0xFFFFFFFFFFFFFFFFULL;
+}
 
 // Struct to represent a node in a linked list where
 // points will be stored in the hash table.
@@ -26,6 +43,7 @@ float calculateParameterD(Point *points, int n);
 
 // Create hash table from points
 void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, int tableSize);
+void freeHashTable(Node** hashTable, int tableSize);
 int getQuadrantKeyFromPoint(Point point, float d);
 void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
@@ -35,7 +53,7 @@ void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node*
 
 // Three hashing functions are used
 int universalHashFun(int key);
-int fastestHashFun(int key);
+int fasterHashFun(int key);
 int mersenneHashFun(int key);
 
 // The algorithm finds the closest pair of points and saves them in the array of size 2 closestPair.
@@ -55,16 +73,24 @@ int mersenneHashFun(int key);
 // where the linked list with all points in this quadrant is stored.
 void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *closestPair) {
 
+    primeExp = 61;
+    prime = (1ULL<<primeExp) - 1; // 2^61-1
+    a = (llrand() % (prime-1)) + 1;
+    b = (llrand() % (prime-1));
+    tableSizeExp = 27;
+    tableSize = (1ULL<<tableSizeExp);
+
     // Calculate the parameter for the size of the quadrants.
     float d = calculateParameterD(points, numPoints);
 
     // Create the hash table with the points, indexed by the hash of the index of the quadrant they belong to.
-    int tableSize = TABLE_SIZE;
     struct Node** hashTable = (struct Node**)malloc(tableSize * sizeof(struct Node*));
     createHashTable(points, numPoints, hashingFun, d, hashTable, tableSize);
     
     // Compare each point with surrounding quadrants’ points, searching for minimum.
     compareEachWithNeighbors(points, numPoints, hashingFun, d, hashTable, closestPair);
+
+    freeHashTable(hashTable, tableSize);
     free(hashTable);
 
 }
@@ -83,7 +109,7 @@ float calculateParameterD(Point *points, int n) {
         Point p2 = points[index2];
         float d = calculateDistance(p1,p2);
 
-        if(d<current_min_d && d>0.000000000000001) {
+        if(d<current_min_d && d>EPSILON) {
             current_min_d = d;    
         }
 
@@ -117,6 +143,18 @@ void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float
         insert(hashTable, key, hashingFun, point);
     }
 
+}
+
+void freeHashTable(Node** hashTable, int tableSize) {
+    for (int i = 0; i < tableSize; i++) {
+        Node* current = hashTable[i];
+        while (current != NULL) {
+            Node* temp = current;
+            current = current->next;
+            free(temp);
+        }
+        hashTable[i] = NULL;
+    }
 }
 
 // Calculates the index of the quadrant a given point belongs to.
@@ -164,7 +202,7 @@ void compareEachWithNeighbors(Point* points, int numPoints, IntFunction hashingF
         do {
             //ActualNode = ActualNode->next;
             float candidateDistance = calculateDistance(point,ActualNode->point);
-            if(candidateDistance < MinD && candidateDistance>0.00000000001){
+            if(candidateDistance < MinD && candidateDistance>EPSILON){
                 //MinD = calculateDistance(point,ActualNode->point);
                 MinD = candidateDistance;
                 closestPair[0] = point;
@@ -269,7 +307,7 @@ void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node*
             //ActualNode = ActualNode->next;
             float candidateDistance = calculateDistance(point,ActualNode->point);
             //int ActualD = calculateDistance(point,ActualNode->point);
-            if(candidateDistance< *MinD && candidateDistance> 0.0000001){
+            if(candidateDistance< *MinD && candidateDistance>EPSILON){
                 *MinD = candidateDistance;
                 closestPair[0] = point;
                 closestPair[1] = ActualNode->point;
@@ -290,13 +328,13 @@ void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node*
 // A key is a quadrant index, for example, key=13.
 // Doing idx=hash(13) will return where in the hash table this quadrant is stored.
 int universalHashFun(int key) {
-    return key;
+    return ((a*key+b) % prime) % tableSize;
 }
 
-int fastestHashFun(int key) {
-    return key;
+int fasterHashFun(int key) {
+    return (((a*key+b) & ((1ULL<<63)-1))) >> (63-tableSizeExp);
 }
 
 int mersenneHashFun(int key) {
-    return key;
+    return (((a*key+b) & ((1<<primeExp)-1)) + ((a*key+b)>>primeExp)) & ((1<<tableSizeExp)-1);
 }
