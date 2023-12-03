@@ -1,12 +1,10 @@
 #include <math.h>
-
 #include "both.h"
 
-// The points live in [0,DOMAIN]x[0,DOMAIN].
-#define DOMAIN 1
-
+#define DOMAIN 1 // The points live in [0,DOMAIN]x[0,DOMAIN].
 #define EPSILON 0.000000000000001
 
+// Global variables used in hashing functions.
 unsigned long long prime;
 int primeExp;
 unsigned long long a;
@@ -74,11 +72,11 @@ int mersenneHashFun(int key);
 void randomized(Point *points, int numPoints, IntFunction hashingFun, Point *closestPair) {
 
     primeExp = 61;
-    prime = (1ULL<<primeExp) - 1; // 2^61-1
+    prime = (1ULL<<primeExp) - 1; // 2^primeExp-1
     a = (llrand() % (prime-1)) + 1;
     b = (llrand() % (prime-1));
     tableSizeExp = 27;
-    tableSize = (1ULL<<tableSizeExp);
+    tableSize = (1ULL<<tableSizeExp); // 2^tableSizeExp-1
 
     // Calculate the parameter for the size of the quadrants.
     float d = calculateParameterD(points, numPoints);
@@ -297,16 +295,10 @@ void compareEachWithNeighbors(Point* points, int numPoints, IntFunction hashingF
 void newMinD(float* MinD, Point* closestPair, Point point,int col,int row, Node** hashTable,int gridDim, IntFunction hashingFun) {
     int key = col + gridDim*row;
     Node *ActualNode = hashTable[hashingFun(key)];
-    //if(calculateDistance(point,ActualNode->point)< MinD){
-        //MinD = calculateDistance(point,ActualNode->point);
-        //closestPair[0] = point;
-        //closestPair[1] = ActualNode->point;
-    //}
+
     if(ActualNode != NULL) {
         do {
-            //ActualNode = ActualNode->next;
             float candidateDistance = calculateDistance(point,ActualNode->point);
-            //int ActualD = calculateDistance(point,ActualNode->point);
             if(candidateDistance< *MinD && candidateDistance>EPSILON){
                 *MinD = candidateDistance;
                 closestPair[0] = point;
