@@ -336,5 +336,13 @@ int fasterHashFun(int key) {
 }
 
 int mersenneHashFun(int key) {
-    return (((a*key+b) & ((1<<primeExp)-1)) + ((a*key+b)>>primeExp)) & ((1<<tableSizeExp)-1);
+
+    unsigned long long x = a*key+b;
+    x = (x & ((1<<primeExp)-1)) + (x>>primeExp);
+
+    if(x>=prime) {
+        x = x-prime; // Lowest value with mod p
+    }
+
+    return x & ((1<<tableSizeExp)-1); // mod m
 }
