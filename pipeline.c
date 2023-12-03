@@ -12,21 +12,21 @@
 // #define N_INITIAL 5000000
 // #define N_FINAL 50000000
 // #define N_STEP 5000000
-#define N_INITIAL 100000
-#define N_FINAL 100000
+#define N_INITIAL 50000000
+#define N_FINAL 50000000
 #define N_STEP 1000
 
 // Amount of times the algorithm will be executed to calculate
 // the average performance
 // #define NUMBER_REPS 101
-#define NUMBER_REPS 200
+#define NUMBER_REPS 101
 
 // Amount of different fixed-sized inputs to analyze dependence on
 // input distribution
 //#define FIXED_INPUT_SIZE 50000000
 //#define FIXED_INPUT_REPS 100
-#define FIXED_INPUT_SIZE 10000
-#define FIXED_INPUT_REPS 10
+#define FIXED_INPUT_SIZE 50000000
+#define FIXED_INPUT_REPS 101
 
 double randomZeroToOne() {
     return (double)rand() / (RAND_MAX + 1.0);
@@ -39,13 +39,9 @@ Point generateRandomPoint() {
     return randomPoint;
 }
 
-int trivialHashFun(int key) {
-    return key%1000;
-}
-
 int main() {
     // Set the seed for testing and evaluation purposes.
-    srand(123);
+    srand(122);
 
 
     printf("============================================\n");
@@ -99,7 +95,7 @@ int main() {
             //printf("- Finding closest pair with randomized...\n");
             clock_t start_time_rd = clock();
             Point *closestPair_rd = (Point *)malloc(2 * sizeof(Point));
-            randomized(points, n, trivialHashFun, closestPair_rd);
+            randomized(points, n, universalHashFun, closestPair_rd);
             clock_t end_time_rd = clock();
             cpu_time_used_rd = ((double)(end_time_rd - start_time_rd)) / CLOCKS_PER_SEC;
             double closestDistance_rd =  calculateDistance(closestPair_rd[0],closestPair_rd[1]);
@@ -163,7 +159,7 @@ int main() {
         //printf("- Finding closest pair with randomized...\n");
         clock_t start_time_rd = clock();
         Point *closestPair_rd = (Point *)malloc(2 * sizeof(Point));
-        randomized(points, FIXED_INPUT_SIZE, trivialHashFun, closestPair_rd);
+        randomized(points, FIXED_INPUT_SIZE, universalHashFun, closestPair_rd);
         clock_t end_time_rd = clock();
         cpu_time_used_rd = ((double)(end_time_rd - start_time_rd)) / CLOCKS_PER_SEC;
         double closestDistance_rd = calculateDistance(closestPair_rd[0],closestPair_rd[1]);
