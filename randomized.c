@@ -45,7 +45,7 @@ float calculateParameterD(Point *points, int n);
 void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, int tableSize);
 void freeHashTable(Node** hashTable, int tableSize);
 int getQuadrantKeyFromPoint(Point point, float d);
-void insert(Node** hashTable, int key, IntFunction hashingFun, Point point);
+void insertInHash(Node** hashTable, int key, IntFunction hashingFun, Point point);
 
 // Compare points in table
 void compareEachWithNeighbors(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, Point *closestPair);
@@ -140,7 +140,7 @@ void createHashTable(Point* points, int numPoints, IntFunction hashingFun, float
     for(int i = 0; i<numPoints; i++) {
         Point point = points[i];
         int key = getQuadrantKeyFromPoint(point, d);
-        insert(hashTable, key, hashingFun, point);
+        insertInHash(hashTable, key, hashingFun, point);
     }
 
 }
@@ -168,7 +168,7 @@ int getQuadrantKeyFromPoint(Point point, float d) {
 
 // Inserts the given point in the given hashTable at the index calculated
 // using the given key and hashingFun.
-void insert(Node** hashTable, int key, IntFunction hashingFun, Point point) {
+void insertInHash(Node** hashTable, int key, IntFunction hashingFun, Point point) {
     int index = hashingFun(key);
 
     Node* newNode = (Node*)malloc(sizeof(Node));
