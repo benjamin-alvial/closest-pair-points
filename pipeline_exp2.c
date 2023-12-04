@@ -119,20 +119,7 @@ int main() {
                    DBL_DIG, closestDistance_rdm);
             free(closestPair_rdm);
 
-            //printf("- Finding closest pair with randomized trivial...\n");
-            clock_t start_time_rdt = clock();
-            Point *closestPair_rdt = (Point *)malloc(2 * sizeof(Point));
-            randomized(points, n, trivialHashFun, closestPair_rdt);
-            clock_t end_time_rdt = clock();
-            double cpu_time_used_rdt = ((double)(end_time_rdt - start_time_rdt)) / CLOCKS_PER_SEC;
-            double closestDistance_rdt =  calculateDistance(closestPair_rdt[0],closestPair_rdt[1]);
-            printf("- Closest pair with randomized trivial: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
-                    DBL_DIG, closestPair_rdt[0].x, DBL_DIG, closestPair_rdt[0].y,
-                    DBL_DIG, closestPair_rdt[1].x, DBL_DIG, closestPair_rdt[1].y,
-                    DBL_DIG, closestDistance_rdt);
-            free(closestPair_rdt);
-
-            fprintf(results_file, "%d, %d, %lf, %lf, %lf, %lf, %lf\n", n, rep, cpu_time_used_sl, cpu_time_used_rdu, cpu_time_used_rdf, cpu_time_used_rdm, cpu_time_used_rdt);
+            fprintf(results_file, "%d, %d, %lf, %lf, %lf, %lf\n", n, rep, cpu_time_used_sl, cpu_time_used_rdu, cpu_time_used_rdf, cpu_time_used_rdm);
                 
         }
 
