@@ -182,26 +182,18 @@ void insertInHash(Node** hashTable, int key, IntFunction hashingFun, Point point
 void compareEachWithNeighbors(Point* points, int numPoints, IntFunction hashingFun, float d, Node** hashTable, Point *closestPair) {
     int gridDim = ceil(DOMAIN/d);
     float MinD = DOMAIN+1;
-    //float MinPar[5] = {0,0,0,0,0};
     int MaxCell = gridDim -1;
-    for(int i = 0; i < numPoints; i++){ // for all number
-        // we got the Key of the point
+    for(int i = 0; i < numPoints; i++){
         Point point = points[i];;
         int col = floor(point.x/d); 
         int row = (gridDim-1) - floor(point.y/d); 
         int key = col + gridDim*row;
-        //Starting Value
+
         // By construction, there is at least one point here (itself)
         Node *ActualNode = hashTable[hashingFun(key)];
-        //MinD = calculateDistance(point,ActualNode->point);
-        //closestPair[0] = point;
-        //closestPair[1] = ActualNode->point;
-        // Calculate de MinD between the same quadrant
         do {
-            //ActualNode = ActualNode->next;
             float candidateDistance = calculateDistance(point,ActualNode->point);
             if(candidateDistance < MinD && candidateDistance>EPSILON){
-                //MinD = calculateDistance(point,ActualNode->point);
                 MinD = candidateDistance;
                 closestPair[0] = point;
                 closestPair[1] = ActualNode->point;
@@ -209,9 +201,6 @@ void compareEachWithNeighbors(Point* points, int numPoints, IntFunction hashingF
             ActualNode = ActualNode->next;
         } while(ActualNode !=NULL);
 
-        //printf("checpojitsn\n");
-        //printf("row,col=%d,%d\n", row, col);
-        //printf("maxcell=%d\n", MaxCell);
         if(col == 0){
             if(row == 0){
                 // Upper-left quadrant
