@@ -15,7 +15,7 @@
 
 // Amount of times the algorithm will be executed to calculate
 // the average performance
-#define NUMBER_REPS 5
+#define NUMBER_REPS 10
 
 double randomZeroToOne() {
     return (double)rand() / (RAND_MAX + 1.0);
