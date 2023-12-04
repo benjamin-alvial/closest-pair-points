@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 
+
 # ============ Experiment 1 ============
 # Creates histograms to see how the cpu times are distributed, for both algorithms,
 # for a selection of 3 array sizes.
@@ -11,6 +12,7 @@ file_path = 'performance_results_1.txt'
 column_names = ['n', 'rep', 'cpu_sl', 'cpu_rdu', 'cpu_rdf', 'cpu_rdm']
 raw_df = pd.read_csv(file_path, names=column_names, delimiter=',')
 exp1_df = raw_df
+print(exp1_df)
 
 fixed_n_array = [5000000, 25000000, 50000000]
 letters = ['a', 'b', 'c']
@@ -55,7 +57,7 @@ column_names = ['n', 'rep', 'cpu_sl', 'cpu_rdu', 'cpu_rdf', 'cpu_rdm']
 raw_df = pd.read_csv(file_path, names=column_names, delimiter=',')
 
 # Specify the chunk size
-NUMBER_REPS = 5
+NUMBER_REPS = 10
 
 # Create an empty DataFrame to store the results
 result_df = pd.DataFrame(columns=['chunk', 'n', 'avg_cpu_sl', 'avg_cpu_rd'])
