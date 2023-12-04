@@ -33,7 +33,7 @@ int main() {
     printf("============================================\n");
 
     // This file will be used to plot the performance data.
-    FILE *results_file = fopen("performance_results_3.txt", "w");
+    FILE *results_file = fopen("results/performance_results_3.txt", "w");
 
     printf("--------------------------------------------\n");
     printf("Finding the closest pair from different %d points for %d repetitions...\n", FIXED_INPUT_SIZE, FIXED_INPUT_REPS);

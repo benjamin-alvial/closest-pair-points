@@ -36,7 +36,7 @@ int main() {
     printf("============================================\n");
 
     // This file will be used to plot the performance data.
-    FILE *results_file = fopen("performance_results_1.txt", "w");
+    FILE *results_file = fopen("results/performance_results_1.txt", "w");
 
     // Iterate over different sizes of arrays.
     int n_sizes[3];
