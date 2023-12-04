@@ -338,3 +338,7 @@ int mersenneHashFun(int key) {
 
     return x & ((1<<tableSizeExp)-1); // mod m
 }
+
+int trivialHashFun(int key) {
+    return key % tableSize;
+}
