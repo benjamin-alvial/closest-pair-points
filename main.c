@@ -23,7 +23,7 @@ int main()
     printf("Creacion random seed:\n");
     srand((unsigned int)time(NULL));
 
-    int n = 10;
+    int n = 50000000;
     printf("n: %d\n", n);
 
     Point *points = (Point *)malloc(n * sizeof(Point));
@@ -38,7 +38,7 @@ int main()
     for (int i = 0; i < n; i++)
     {
         points[i] = generateRandomPoint();
-        printf("Point: (%f, %f)\n", points[i].x, points[i].y);
+        // printf("Point: (%f, %f)\n", points[i].x, points[i].y);
     }
 
     printf("Se generaron los %d puntos:\n", n);
@@ -51,7 +51,7 @@ int main()
 
     printf("Inicio sweepline\n");
     start_sl = time(NULL);
-    sweepline(points, n, closestPair_sl, &distance_sl);
+    // sweepline(points, n, closestPair_sl, &distance_sl);
     end_sl = time(NULL);
     printf("Termino sweepline\n");
 
@@ -76,10 +76,6 @@ int main()
            DBL_DIG, pair.point1.x, DBL_DIG, pair.point1.y,
            DBL_DIG, pair.point2.x, DBL_DIG, pair.point2.y,
            DBL_DIG, pair.distance);
-
-    printf("Last two points: (%.*lf, %.*lf) y (%.*lf, %.*lf)",
-           DBL_DIG, points[0].x, DBL_DIG, points[0].x,
-           DBL_DIG, points[1].x, DBL_DIG, points[1].x);
 
     free(points);
 

@@ -139,9 +139,11 @@ void sweepline(Point *points, int numPoints, Point *closestPair, double *dist)
     */
 }
 
-ClosestPair bruteForce(Point *P, int n)
+ClosestPair bruteForce(Point P[], int n)
 {
-    ClosestPair closestPair = {DBL_MAX, {0, 0}, {0, 0}};
+    double minDist = DBL_MAX;
+    ClosestPair minPair = {DBL_MAX, {0, 0}, {0, 0}};
+
     for (int i = 0; i < n; ++i)
     {
         for (int j = i + 1; j < n; ++j)
@@ -151,43 +153,44 @@ ClosestPair bruteForce(Point *P, int n)
                 continue; // Ignora si los puntos son idénticos
             }
             double dist = calculateDistance(P[i], P[j]);
-            if (dist < closestPair.distance)
+            if (dist < minDist)
             {
-                closestPair.distance = dist;
-                closestPair.point1 = P[i];
-                closestPair.point2 = P[j];
+                minDist = dist;
+                minPair = (ClosestPair){dist, P[i], P[j]};
             }
         }
     }
-    return closestPair;
+    return minPair;
 }
 
-ClosestPair stripClosest(Point *strip, int size, float d)
+ClosestPair stripClosest(Point strip[], int size, double d)
 {
-    ClosestPair closestPair = {d, {0, 0}, {0, 0}};
+    double min = d;
+    ClosestPair minPair = {d, {0, 0}, {0, 0}};
+
     qsort(strip, size, sizeof(Point), compareY);
 
     for (int i = 0; i < size; ++i)
     {
-        for (int j = i + 1; j < size && (strip[j].y - strip[i].y) < closestPair.distance; ++j)
+        for (int j = i + 1; j < size && (strip[j].y - strip[i].y) < min; ++j)
         {
             if (strip[i].x == strip[j].x && strip[i].y == strip[j].y)
             {
                 continue; // Ignora si los puntos son idénticos
             }
             double dist = calculateDistance(strip[i], strip[j]);
-            if (dist < closestPair.distance)
+            if (dist < min)
             {
-                closestPair.distance = dist;
-                closestPair.point1 = strip[i];
-                closestPair.point2 = strip[j];
+                min = dist;
+                minPair = (ClosestPair){dist, strip[i], strip[j]};
             }
         }
     }
-    return closestPair;
+
+    return minPair;
 }
 
-ClosestPair closestUtil(Point *P, int n)
+ClosestPair closestUtil(Point P[], int n)
 {
     if (n <= 3)
         return bruteForce(P, n);
@@ -201,22 +204,27 @@ ClosestPair closestUtil(Point *P, int n)
     ClosestPair d = (dl.distance < dr.distance) ? dl : dr;
 
     Point *strip = malloc(n * sizeof(Point));
+
+    if (strip == NULL)
+    {
+        exit(1);
+    }
+
     int j = 0;
     for (int i = 0; i < n; i++)
-    {
-        if (abs(P[i].x - midPoint.x) < d.distance)
-            strip[j] = P[i], j++;
-    }
+        if (fabs(P[i].x - midPoint.x) < d.distance)
+            strip[j++] = P[i];
 
     ClosestPair stripPair = stripClosest(strip, j, d.distance);
     if (stripPair.distance < d.distance)
         d = stripPair;
 
     free(strip);
+
     return d;
 }
 
-ClosestPair closest(Point *P, int n)
+ClosestPair closest(Point P[], int n)
 {
     qsort(P, n, sizeof(Point), compareX);
     return closestUtil(P, n);
