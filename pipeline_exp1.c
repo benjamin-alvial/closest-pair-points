@@ -29,7 +29,7 @@ Point generateRandomPoint() {
 int main() {
     // Set the seed for testing and evaluation purposes.
     // This seed will allow for different d values in randomized in each repetition.
-    srand(1234);
+    srand(123);
 
     printf("============================================\n");
     printf("EXP. 1: SAME ARRAY FOR GIVEN SIZE...\n");
