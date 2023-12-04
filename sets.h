@@ -14,6 +14,12 @@ typedef struct
     int length;
 } Set;
 
+typedef struct
+{
+    double distance;
+    Point point1, point2;
+} ClosestPair;
+
 Set *init();
 bool is_member(Set *set, Point value);
 void insert(Set *set, Point member);

@@ -1,11 +1,8 @@
 #ifndef SWEEP_LINE_H
 #define SWEEP_LINE_H
+#include "sets.h"
 
-typedef struct
-{
-    double x, y;
-} Point;
-
-void sweepline(Point *points, int numPoints, Point *closestPair);
+ClosestPair closest(Point *P, int n);
+void sweepline(Point *points, int numPoints, Point *closestPair, double *dist);
 
 #endif

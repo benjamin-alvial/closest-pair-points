@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-#include "sets.h" // Asegúrate de que este archivo define correctamente la estructura Set y sus funciones asociadas
+#include "sets.h"
 
 double calculateDistance(Point p1, Point p2)
 {
@@ -13,13 +13,15 @@ double calculateDistance(Point p1, Point p2)
 int compareX(const void *a, const void *b)
 {
     Point *p1 = (Point *)a, *p2 = (Point *)b;
-    return (p1->x > p2->x) - (p1->x < p2->x);
-}
-
-int compareY(const void *a, const void *b)
-{
-    Point *p1 = (Point *)a, *p2 = (Point *)b;
-    return (p1->y - p2->y);
+    if (p1->x > p2->x)
+    {
+        return 1;
+    }
+    else if (p1->x < p2->x)
+    {
+        return -1;
+    }
+    return 0;
 }
 
 bool arePointsEqual(Point p1, Point p2)
@@ -94,9 +96,9 @@ void sweepline(Point *points, int numPoints, Point *closestPair, double *dist)
             if (distance < d)
             {
                 d = distance;
-                *dist = d;
                 closestPair[0] = points[i];
                 closestPair[1] = intersection->members[j];
+                *dist = d;
             }
         }
 
@@ -137,87 +139,58 @@ void sweepline(Point *points, int numPoints, Point *closestPair, double *dist)
         printf("Ambos puntos del par mas cercano se encontraron en el arreglo original.\n");
     }
     */
+};
+
+int compareY(const void *a, const void *b)
+{
+    Point *p1 = (Point *)a, *p2 = (Point *)b;
+    return (p1->y > p2->y) - (p1->y < p2->y);
 }
 
-ClosestPair bruteForce(Point *P, int n)
+void closestPair(Point *points, int numPoints, Point *closestPairPoints, double *distance)
 {
-    ClosestPair closestPair = {DBL_MAX, {0, 0}, {0, 0}};
-    for (int i = 0; i < n; ++i)
+    qsort(points, numPoints, sizeof(Point), compareX);
+
+    double d = DBL_MAX;
+    Point *strip = malloc(numPoints * sizeof(Point));
+
+    if (!strip)
     {
-        for (int j = i + 1; j < n; ++j)
+        // Handle memory allocation failure
+        exit(1);
+    }
+
+    for (int i = 0; i < numPoints; ++i)
+    {
+        // Consider points only within the strip of width 2d
+        int stripCount = 0;
+        for (int j = i + 1; j < numPoints && (points[j].x - points[i].x) < d; ++j)
         {
-            if (P[i].x == P[j].x && P[i].y == P[j].y)
+            strip[stripCount++] = points[j];
+        }
+
+        qsort(strip, stripCount, sizeof(Point), compareY);
+
+        // Find the closest points in strip.
+        for (int k = 0; k < stripCount; ++k)
+        {
+            for (int l = k + 1; l < stripCount && (strip[l].y - strip[k].y) < d; ++l)
             {
-                continue; // Ignora si los puntos son idénticos
-            }
-            double dist = calculateDistance(P[i], P[j]);
-            if (dist < closestPair.distance)
-            {
-                closestPair.distance = dist;
-                closestPair.point1 = P[i];
-                closestPair.point2 = P[j];
+                if (strip[k].x != strip[l].x || strip[k].y != strip[l].y) // Make sure they are not the same point
+                {
+                    double dist = calculateDistance(strip[k], strip[l]);
+                    if (dist < d)
+                    {
+                        d = dist; // Update the minimum distance
+                        // Update the closest pair
+                        closestPairPoints[0] = strip[k];
+                        closestPairPoints[1] = strip[l];
+                        *distance = d;
+                    }
+                }
             }
         }
     }
-    return closestPair;
-}
-
-ClosestPair stripClosest(Point *strip, int size, float d)
-{
-    ClosestPair closestPair = {d, {0, 0}, {0, 0}};
-    qsort(strip, size, sizeof(Point), compareY);
-
-    for (int i = 0; i < size; ++i)
-    {
-        for (int j = i + 1; j < size && (strip[j].y - strip[i].y) < closestPair.distance; ++j)
-        {
-            if (strip[i].x == strip[j].x && strip[i].y == strip[j].y)
-            {
-                continue; // Ignora si los puntos son idénticos
-            }
-            double dist = calculateDistance(strip[i], strip[j]);
-            if (dist < closestPair.distance)
-            {
-                closestPair.distance = dist;
-                closestPair.point1 = strip[i];
-                closestPair.point2 = strip[j];
-            }
-        }
-    }
-    return closestPair;
-}
-
-ClosestPair closestUtil(Point *P, int n)
-{
-    if (n <= 3)
-        return bruteForce(P, n);
-
-    int mid = n / 2;
-    Point midPoint = P[mid];
-
-    ClosestPair dl = closestUtil(P, mid);
-    ClosestPair dr = closestUtil(P + mid, n - mid);
-
-    ClosestPair d = (dl.distance < dr.distance) ? dl : dr;
-
-    Point *strip = malloc(n * sizeof(Point));
-    int j = 0;
-    for (int i = 0; i < n; i++)
-    {
-        if (abs(P[i].x - midPoint.x) < d.distance)
-            strip[j] = P[i], j++;
-    }
-
-    ClosestPair stripPair = stripClosest(strip, j, d.distance);
-    if (stripPair.distance < d.distance)
-        d = stripPair;
 
     free(strip);
-    return d;
-}
-
-ClosestPair closest(Point *P, int n)
-{
-    qsort(P, n, sizeof(Point), compareX);
-    return closestUtil(P, n);
 }
