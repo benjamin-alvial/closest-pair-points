@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-//#include "sets.h" // Asegúrate de que este archivo define correctamente la estructura Set y sus funciones asociadas
 #include <stdbool.h>
 
 #include "both.h"
@@ -124,7 +123,7 @@ ClosestPair closest(Point P[], int n)
 }
 
 
-void sweepline(Point *points, int numPoints, Point *closestPair)
+void divideConquer(Point *points, int numPoints, Point *closestPair)
 {
     ClosestPair pair = closest(points, numPoints);
     closestPair[0] = pair.point1;

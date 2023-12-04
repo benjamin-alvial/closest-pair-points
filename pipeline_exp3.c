@@ -4,7 +4,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "sweep-line.c"
+#include "divide-conquer.c"
 #include "randomized.c"
 
 // Different fixed-sized inputs, 
@@ -55,18 +55,18 @@ int main() {
             // printf("Point: (%f, %f)\n", points[i].x, points[i].y);
         }
 
-        //printf("- Finding closest pair with sweep-line...\n");
-        clock_t start_time_sl = clock();
-        Point *closestPair_sl = (Point *)malloc(2 * sizeof(Point));
-        sweepline(points, FIXED_INPUT_SIZE, closestPair_sl);
-        clock_t end_time_sl = clock();
-        double cpu_time_used_sl = ((double)(end_time_sl - start_time_sl)) / CLOCKS_PER_SEC;
-        double closestDistance_sl =  calculateDistance(closestPair_sl[0],closestPair_sl[1]);
-        printf("- Closest pair with sweep-line: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
-                DBL_DIG, closestPair_sl[0].x, DBL_DIG, closestPair_sl[0].y,
-                DBL_DIG, closestPair_sl[1].x, DBL_DIG, closestPair_sl[1].y,
-                DBL_DIG, closestDistance_sl);
-        free(closestPair_sl);
+        //printf("- Finding closest pair with divide conquer...\n");
+        clock_t start_time_dc = clock();
+        Point *closestPair_dc = (Point *)malloc(2 * sizeof(Point));
+        divideConquer(points, FIXED_INPUT_SIZE, closestPair_dc);
+        clock_t end_time_dc = clock();
+        double cpu_time_used_dc = ((double)(end_time_dc - start_time_dc)) / CLOCKS_PER_SEC;
+        double closestDistance_dc =  calculateDistance(closestPair_dc[0],closestPair_dc[1]);
+        printf("- Closest pair with divide conquer: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
+                DBL_DIG, closestPair_dc[0].x, DBL_DIG, closestPair_dc[0].y,
+                DBL_DIG, closestPair_dc[1].x, DBL_DIG, closestPair_dc[1].y,
+                DBL_DIG, closestDistance_dc);
+        free(closestPair_dc);
 
         //printf("- Finding closest pair with randomized universal...\n");
         clock_t start_time_rdu = clock();
@@ -108,7 +108,7 @@ int main() {
         free(closestPair_rdm);
 
         free(points);
-        fprintf(results_file, "%d, %lf, %lf, %lf, %lf\n", rep, cpu_time_used_sl, cpu_time_used_rdu, cpu_time_used_rdf, cpu_time_used_rdm);
+        fprintf(results_file, "%d, %lf, %lf, %lf, %lf\n", rep, cpu_time_used_dc, cpu_time_used_rdu, cpu_time_used_rdf, cpu_time_used_rdm);
 
     }
 
