@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
-"""
+
 # ============ Experiment 1 ============
 # Creates histograms to see how the cpu times are distributed, for both algorithms,
 # for a selection of 3 array sizes.
@@ -37,13 +37,14 @@ for i in [0,1,2]:
 
     # Plot histograms for avg_cpu_rd
     plt.figure(figsize=(10, 6))
-    plt.hist([filtered_df['cpu_sl'], filtered_df['cpu_ru'], filtered_df['cpu_rdf'], filtered_df['cpu_rdm']], alpha=0.7, label=['cpu_sl', 'cpu_rdu', 'cpu_rdf', 'cpu_rdm'])
+    plt.hist([filtered_df['cpu_sl'], filtered_df['cpu_rdu'], filtered_df['cpu_rdf'], filtered_df['cpu_rdm']], alpha=0.7, label=['cpu_sl', 'cpu_rdu', 'cpu_rdf', 'cpu_rdm'])
     plt.xlabel('time (s)')
     plt.ylabel('frequency')
     plt.title(f'Histogram for n={fixed_n}')
     plt.legend()
     plt.savefig('exp1'+letter+'b.png')
     plt.show()
+
 
 # ============ Experiment 2 ============
 # Plots the average time taken by each algorithm as a function of the number of points.
@@ -96,7 +97,7 @@ plt.legend()
 plt.savefig('exp2.png')
 plt.show()
 
-"""
+
 # ============ Experiment 3 ============
 # Plots histogram of times taken by algorithms for 
 # different arrays of points of a fixed size.
