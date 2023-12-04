@@ -157,32 +157,32 @@ plt.show()
 # ------- Plotting each in their own plot -------
 # Set the number of bins for the histogram
 num_bins = 10
-fixed_n = 5000000
+FIXED_N = 5000000
 
 plt.hist(exp3_df['cpu_dc'], bins=num_bins, alpha=0.5, label='cpu_dc')
 plt.xlabel('time (s)')
 plt.ylabel('frequency')
-plt.title(f'Divide Conquer CPU times for different arrays for n={fixed_n}')
+plt.title(f'Divide Conquer CPU times for different arrays for n={FIXED_N}')
 plt.savefig('exp3/exp3b.png')
 plt.show()
 
 plt.hist(exp3_df['cpu_rdu'], bins=num_bins, alpha=0.5, label='cpu_rdu')
 plt.xlabel('time (s)')
 plt.ylabel('frequency')
-plt.title(f'Randomized Universal CPU times for different arrays for n={fixed_n}')
+plt.title(f'Randomized Universal CPU times for different arrays for n={FIXED_N}')
 plt.savefig('exp3/exp3c.png')
 plt.show()
 
 plt.hist(exp3_df['cpu_rdf'], bins=num_bins, alpha=0.5, label='cpu_rdf')
 plt.xlabel('time (s)')
 plt.ylabel('frequency')
-plt.title(f'Randomized Faster CPU times for different arrays for n={fixed_n}')
+plt.title(f'Randomized Faster CPU times for different arrays for n={FIXED_N}')
 plt.savefig('exp3/exp3d.png')
 plt.show()
 
 plt.hist(exp3_df['cpu_rdm'], bins=num_bins, alpha=0.5, label='cpu_rdm')
 plt.xlabel('time (s)')
 plt.ylabel('frequency')
-plt.title(f'Randomized Mersenne CPU times for different arrays for n={fixed_n}')
+plt.title(f'Randomized Mersenne CPU times for different arrays for n={FIXED_N}')
 plt.savefig('exp3/exp3e.png')
 plt.show()
