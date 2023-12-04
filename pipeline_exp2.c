@@ -126,7 +126,7 @@ int main() {
             clock_t end_time_rdt = clock();
             double cpu_time_used_rdt = ((double)(end_time_rdt - start_time_rdt)) / CLOCKS_PER_SEC;
             double closestDistance_rdt =  calculateDistance(closestPair_rdt[0],closestPair_rdt[1]);
-            printf("- Closest pair with randomized mersenne: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
+            printf("- Closest pair with randomized trivial: (%.*lf, %.*lf) and (%.*lf, %.*lf) with distance %.*lf\n",
                     DBL_DIG, closestPair_rdt[0].x, DBL_DIG, closestPair_rdt[0].y,
                     DBL_DIG, closestPair_rdt[1].x, DBL_DIG, closestPair_rdt[1].y,
                     DBL_DIG, closestDistance_rdt);
